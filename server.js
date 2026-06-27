@@ -16,18 +16,18 @@ const MIME_TYPES = {
 };
 
 const FALLBACK_RATINGS = {
-  arrival: { imdb: '8.0/10', rottenTomatoes: '94%', metacritic: '81' },
-  'mad max: fury road': { imdb: '8.1/10', rottenTomatoes: '97%', metacritic: '86' },
-  moonlight: { imdb: '7.4/10', rottenTomatoes: '98%', metacritic: '99' },
-  parasite: { imdb: '8.5/10', rottenTomatoes: '99%', metacritic: '96' },
-  'la la land': { imdb: '8.0/10', rottenTomatoes: '91%', metacritic: '93' },
-  'blade runner 2049': { imdb: '8.0/10', rottenTomatoes: '88%', metacritic: '81' },
-  'knives out': { imdb: '7.9/10', rottenTomatoes: '97%', metacritic: '82' },
-  interstellar: { imdb: '8.7/10', rottenTomatoes: '72%', metacritic: '74' },
-  'there will be blood': { imdb: '8.2/10', rottenTomatoes: '91%', metacritic: '92' },
-  'the martian': { imdb: '8.0/10', rottenTomatoes: '91%', metacritic: '80' },
-  'lady bird': { imdb: '7.4/10', rottenTomatoes: '99%', metacritic: '94' },
-  dune: { imdb: '8.0/10', rottenTomatoes: '83%', metacritic: '74' },
+  arrival: { imdb: '8.0/10', rottenTomatoes: '—', metacritic: '—' },
+  'mad max: fury road': { imdb: '8.1/10', rottenTomatoes: '—', metacritic: '—' },
+  moonlight: { imdb: '7.4/10', rottenTomatoes: '—', metacritic: '—' },
+  parasite: { imdb: '8.5/10', rottenTomatoes: '—', metacritic: '—' },
+  'la la land': { imdb: '8.0/10', rottenTomatoes: '—', metacritic: '—' },
+  'blade runner 2049': { imdb: '8.0/10', rottenTomatoes: '—', metacritic: '—' },
+  'knives out': { imdb: '7.9/10', rottenTomatoes: '—', metacritic: '—' },
+  interstellar: { imdb: '8.7/10', rottenTomatoes: '—', metacritic: '—' },
+  'there will be blood': { imdb: '8.2/10', rottenTomatoes: '—', metacritic: '—' },
+  'the martian': { imdb: '8.0/10', rottenTomatoes: '—', metacritic: '—' },
+  'lady bird': { imdb: '7.4/10', rottenTomatoes: '—', metacritic: '—' },
+  dune: { imdb: '8.0/10', rottenTomatoes: '—', metacritic: '—' },
 };
 
 function getFilePath(requestPath) {
@@ -134,8 +134,6 @@ async function scrapeRating(title) {
 
   const searchQueries = {
     imdb: `https://www.imdb.com/find/?q=${encodeURIComponent(title)}&s=tt`,
-    rottenTomatoes: `https://www.rottentomatoes.com/search?search=${encodeURIComponent(title)}`,
-    metacritic: `https://www.metacritic.com/search/movie/${encodeURIComponent(title)}/results`,
   };
 
   try {
@@ -151,33 +149,10 @@ async function scrapeRating(title) {
       ]);
     }
 
-    const rtSearchHtml = await fetchUrl(searchQueries.rottenTomatoes);
-    const rtPath = rtSearchHtml.match(/href="(\/m\/[^"?]+)"/);
-    let rottenTomatoes = null;
-    if (rtPath) {
-      const detailHtml = await fetchUrl(`https://www.rottentomatoes.com${rtPath[1]}`);
-      rottenTomatoes = extractText(detailHtml, [
-        /tomatometer[^>]*>([0-9]{1,3})%/i,
-        /Tomatometer[^0-9]+([0-9]{1,3})%/i,
-      ]);
-    }
-
-    const metacriticSearchHtml = await fetchUrl(searchQueries.metacritic);
-    const mcPath = metacriticSearchHtml.match(/href="(\/movie\/[^"?]+)"/);
-    let metacritic = null;
-    if (mcPath) {
-      const detailHtml = await fetchUrl(`https://www.metacritic.com${mcPath[1]}`);
-      metacritic = extractText(detailHtml, [
-        /itemprop="ratingValue" content="([0-9]{1,3})"/i,
-        /Metascore[^0-9]+([0-9]{1,3})/i,
-        /metascore_w[^>]*>([0-9]{1,3})</i,
-      ]);
-    }
-
     return {
       imdb: imdb ? `${imdb}/10` : '—',
-      rottenTomatoes: rottenTomatoes ? `${rottenTomatoes}%` : '—',
-      metacritic: metacritic ? `${metacritic}` : '—',
+      rottenTomatoes: '—',
+      metacritic: '—',
     };
   } catch (error) {
     return {

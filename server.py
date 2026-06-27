@@ -17,18 +17,18 @@ MIME_TYPES = {
 }
 
 FALLBACK_RATINGS = {
-    'arrival': {'imdb': '8.0/10', 'rottenTomatoes': '94%', 'metacritic': '81'},
-    'mad max: fury road': {'imdb': '8.1/10', 'rottenTomatoes': '97%', 'metacritic': '86'},
-    'moonlight': {'imdb': '7.4/10', 'rottenTomatoes': '98%', 'metacritic': '99'},
-    'parasite': {'imdb': '8.5/10', 'rottenTomatoes': '99%', 'metacritic': '96'},
-    'la la land': {'imdb': '8.0/10', 'rottenTomatoes': '91%', 'metacritic': '93'},
-    'blade runner 2049': {'imdb': '8.0/10', 'rottenTomatoes': '88%', 'metacritic': '81'},
-    'knives out': {'imdb': '7.9/10', 'rottenTomatoes': '97%', 'metacritic': '82'},
-    'interstellar': {'imdb': '8.7/10', 'rottenTomatoes': '72%', 'metacritic': '74'},
-    'there will be blood': {'imdb': '8.2/10', 'rottenTomatoes': '91%', 'metacritic': '92'},
-    'the martian': {'imdb': '8.0/10', 'rottenTomatoes': '91%', 'metacritic': '80'},
-    'lady bird': {'imdb': '7.4/10', 'rottenTomatoes': '99%', 'metacritic': '94'},
-    'dune': {'imdb': '8.0/10', 'rottenTomatoes': '83%', 'metacritic': '74'},
+    'arrival': {'imdb': '8.0/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'mad max: fury road': {'imdb': '8.1/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'moonlight': {'imdb': '7.4/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'parasite': {'imdb': '8.5/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'la la land': {'imdb': '8.0/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'blade runner 2049': {'imdb': '8.0/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'knives out': {'imdb': '7.9/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'interstellar': {'imdb': '8.7/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'there will be blood': {'imdb': '8.2/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'the martian': {'imdb': '8.0/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'lady bird': {'imdb': '7.4/10', 'rottenTomatoes': '—', 'metacritic': '—'},
+    'dune': {'imdb': '8.0/10', 'rottenTomatoes': '—', 'metacritic': '—'},
 }
 
 
@@ -87,27 +87,7 @@ def get_ratings(title):
         else:
             imdb = '—'
 
-        rt_url = f"https://www.rottentomatoes.com/search?search={urllib.parse.quote(title)}"
-        rt_html = fetch_url(rt_url)
-        rt_match = __import__('re').search(r'href="(/m/[^"?]+)"', rt_html)
-        rotten = '—'
-        if rt_match:
-            rt_detail = fetch_url(f"https://www.rottentomatoes.com{rt_match.group(1)}")
-            rt_rating = __import__('re').search(r'([0-9]{1,3})%', rt_detail)
-            if rt_rating:
-                rotten = f"{rt_rating.group(1)}%"
-
-        mc_url = f"https://www.metacritic.com/search/movie/{urllib.parse.quote(title)}/results"
-        mc_html = fetch_url(mc_url)
-        mc_match = __import__('re').search(r'href="(/movie/[^"?]+)"', mc_html)
-        metacritic = '—'
-        if mc_match:
-            mc_detail = fetch_url(f"https://www.metacritic.com{mc_match.group(1)}")
-            mc_rating = __import__('re').search(r'itemprop="ratingValue" content="([0-9]{1,3})"', mc_detail)
-            if mc_rating:
-                metacritic = mc_rating.group(1)
-
-        return {'imdb': imdb, 'rottenTomatoes': rotten, 'metacritic': metacritic}
+        return {'imdb': imdb, 'rottenTomatoes': '—', 'metacritic': '—'}
     except Exception:
         return {'imdb': '—', 'rottenTomatoes': '—', 'metacritic': '—'}
 
