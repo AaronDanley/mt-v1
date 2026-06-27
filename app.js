@@ -14,6 +14,10 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString('en', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function normalizeTitle(value) {
+  return String(value).trim().toLowerCase();
+}
+
 function renderMovies() {
   const filtered = filterMovies(allMovies, categoryFilter.value);
   const sorted = sortMovies(filtered, sortSelect.value);
@@ -28,6 +32,11 @@ function renderMovies() {
   movieList.innerHTML = sorted
     .map((movie) => `
       <article class="movie-card">
+        <div class="poster-wrap">
+          ${movie.poster
+            ? `<img class="movie-poster" src="${movie.poster}" alt="${movie.title} poster" loading="lazy" />`
+            : '<div class="poster-placeholder">No poster</div>'}
+        </div>
         <header>
           <div>
             <h3>${movie.title}</h3>
@@ -79,7 +88,17 @@ function renderMovies() {
 async function loadMovies() {
   const response = await fetch('/movies.json');
   const movies = await response.json();
-  allMovies = movies;
+
+  try {
+    const postersResponse = await fetch(`/api/posters?titles=${encodeURIComponent(movies.map((movie) => movie.title).join(','))}`);
+    const posters = await postersResponse.json();
+    allMovies = movies.map((movie) => ({
+      ...movie,
+      poster: posters[normalizeTitle(movie.title)] || null,
+    }));
+  } catch (error) {
+    allMovies = movies;
+  }
 
   const categories = ['all', ...new Set(movies.map((movie) => movie.category))];
   categoryFilter.innerHTML = categories

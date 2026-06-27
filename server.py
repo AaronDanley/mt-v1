@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -81,6 +82,25 @@ def get_ratings(title):
         return {'imdb': '—', 'rottenTomatoes': '—', 'metacritic': '—'}
 
 
+def get_poster(title):
+    try:
+        query = title.strip().lower()
+        if not query:
+            return None
+
+        suggestion_url = f"https://v2.sg.media-imdb.com/suggestion/{query[0]}/{query}.json"
+        suggestion_data = fetch_url(suggestion_url)
+        payload = json.loads(suggestion_data)
+        results = payload.get('d', [])
+        if not results:
+            return None
+
+        poster = results[0].get('i', {}).get('imageUrl')
+        return poster if poster else None
+    except Exception:
+        return None
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -89,6 +109,16 @@ class Handler(BaseHTTPRequestHandler):
         if path == '/api/ratings':
             title = urllib.parse.parse_qs(parsed.query).get('title', [''])[0]
             payload = get_ratings(title)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(payload).encode('utf-8'))
+            return
+
+        if path == '/api/posters':
+            titles = urllib.parse.parse_qs(parsed.query).get('titles', [''])[0]
+            requested_titles = [t.strip() for t in titles.split(',') if t.strip()]
+            payload = {title.strip().lower(): get_poster(title) for title in requested_titles}
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
