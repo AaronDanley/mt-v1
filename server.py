@@ -41,6 +41,33 @@ def fetch_url(url):
         return response.read().decode('utf-8', errors='ignore')
 
 
+def extractPosterUrl(html):
+    for pattern in [
+        r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<meta[^>]+itemprop=["\']image["\'][^>]+content=["\']([^"\']+)["\']',
+    ]:
+        match = re.search(pattern, html, re.IGNORECASE)
+        if match:
+            return match.group(1)
+
+    for match in re.finditer(r'https?://[^"\'\s]+\.(?:jpe?g|png|webp)(?:\?[^"\'\s]*)?', html, re.IGNORECASE):
+        candidate = match.group(0)
+        if 'media-imdb' in candidate or 'm.media-amazon' in candidate or 'ia.media-imdb' in candidate:
+            return candidate
+
+    return None
+
+
+def build_omdb_poster_url(title, api_key=None):
+    if not title:
+        return None
+
+    api_key = api_key or os.environ.get('OMDB_API_KEY', 'trilogy')
+    params = urllib.parse.urlencode({'apikey': api_key, 't': title, 'type': 'movie'})
+    return f'https://www.omdbapi.com/?{params}'
+
+
 def get_ratings(title):
     normalized = title.strip().lower()
     if normalized in FALLBACK_RATINGS:
@@ -84,19 +111,26 @@ def get_ratings(title):
 
 def get_poster(title):
     try:
-        query = title.strip().lower()
+        query = title.strip()
         if not query:
             return None
 
-        suggestion_url = f"https://v2.sg.media-imdb.com/suggestion/{query[0]}/{query}.json"
-        suggestion_data = fetch_url(suggestion_url)
-        payload = json.loads(suggestion_data)
-        results = payload.get('d', [])
-        if not results:
-            return None
+        api_key = os.environ.get('OMDB_API_KEY', 'trilogy')
+        detail_url = build_omdb_poster_url(query, api_key)
+        payload = json.loads(fetch_url(detail_url))
+        if payload.get('Response') == 'True' and payload.get('Poster') and payload.get('Poster') != 'N/A':
+            return payload.get('Poster')
 
-        poster = results[0].get('i', {}).get('imageUrl')
-        return poster if poster else None
+        search_url = f"https://www.omdbapi.com/?{urllib.parse.urlencode({'apikey': api_key, 's': query, 'type': 'movie'})}"
+        search_payload = json.loads(fetch_url(search_url))
+        first_result = search_payload.get('Search', [{}])[0]
+        if first_result.get('Title'):
+            fallback_url = build_omdb_poster_url(first_result['Title'], api_key)
+            fallback_payload = json.loads(fetch_url(fallback_url))
+            if fallback_payload.get('Response') == 'True' and fallback_payload.get('Poster') and fallback_payload.get('Poster') != 'N/A':
+                return fallback_payload.get('Poster')
+
+        return None
     except Exception:
         return None
 

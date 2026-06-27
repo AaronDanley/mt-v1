@@ -45,6 +45,39 @@ function normalizeTitle(title) {
   return String(title || '').trim().toLowerCase();
 }
 
+export function extractPosterUrl(html) {
+  const patterns = [
+    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+itemprop=["']image["'][^>]+content=["']([^"']+)["']/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match) return match[1];
+  }
+
+  const imageMatch = html.match(/https?:\/\/[^"'\s]+\.(?:jpe?g|png|webp)(?:\?[^"'\s]*)?/i);
+  if (imageMatch) {
+    return imageMatch[0];
+  }
+
+  return null;
+}
+
+export function buildOmdbPosterUrl(title, apiKey = process.env.OMDB_API_KEY || 'trilogy') {
+  const normalizedTitle = String(title || '').trim();
+  if (!normalizedTitle) {
+    return null;
+  }
+
+  const url = new URL('https://www.omdbapi.com/');
+  url.searchParams.set('apikey', apiKey);
+  url.searchParams.set('t', normalizedTitle);
+  url.searchParams.set('type', 'movie');
+  return url.toString();
+}
+
 function extractText(html, patterns) {
   for (const pattern of patterns) {
     const match = html.match(pattern);
@@ -65,6 +98,47 @@ async function fetchUrl(url) {
   }
 
   return response.text();
+}
+
+async function getPoster(title) {
+  const normalized = normalizeTitle(title);
+  if (!normalized) {
+    return null;
+  }
+
+  try {
+    const omdbApiKey = process.env.OMDB_API_KEY || 'trilogy';
+    const detailUrl = buildOmdbPosterUrl(title, omdbApiKey);
+    const detailResponse = await fetchUrl(detailUrl);
+    const detailPayload = JSON.parse(detailResponse);
+
+    if (detailPayload.Response === 'True' && detailPayload.Poster && detailPayload.Poster !== 'N/A') {
+      return detailPayload.Poster;
+    }
+
+    const searchUrl = new URL('https://www.omdbapi.com/');
+    searchUrl.searchParams.set('apikey', omdbApiKey);
+    searchUrl.searchParams.set('s', title);
+    searchUrl.searchParams.set('type', 'movie');
+
+    const searchResponse = await fetchUrl(searchUrl.toString());
+    const searchPayload = JSON.parse(searchResponse);
+    const firstResult = searchPayload.Search?.[0];
+
+    if (firstResult?.Title) {
+      const fallbackUrl = buildOmdbPosterUrl(firstResult.Title, omdbApiKey);
+      const fallbackResponse = await fetchUrl(fallbackUrl);
+      const fallbackPayload = JSON.parse(fallbackResponse);
+
+      if (fallbackPayload.Response === 'True' && fallbackPayload.Poster && fallbackPayload.Poster !== 'N/A') {
+        return fallbackPayload.Poster;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
 }
 
 async function scrapeRating(title) {
@@ -144,6 +218,26 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/ratings') {
     const { title = '' } = Object.fromEntries(new URLSearchParams(url.split('?')[1] || ''));
     const ratings = await scrapeRating(title);
+    return sendJson(res, ratings);
+  }
+
+  if (pathname === '/api/posters') {
+    const { titles = '' } = Object.fromEntries(new URLSearchParams(url.split('?')[1] || ''));
+    const requestedTitles = titles.split(',').map((entry) => entry.trim()).filter(Boolean);
+    const posters = {};
+    for (const title of requestedTitles) {
+      posters[normalizeTitle(title)] = await getPoster(title);
+    }
+    return sendJson(res, posters);
+  }
+
+  if (pathname === '/api/ratings-bulk') {
+    const { titles = '' } = Object.fromEntries(new URLSearchParams(url.split('?')[1] || ''));
+    const requestedTitles = titles.split(',').map((entry) => entry.trim()).filter(Boolean);
+    const ratings = {};
+    for (const title of requestedTitles) {
+      ratings[normalizeTitle(title)] = await scrapeRating(title);
+    }
     return sendJson(res, ratings);
   }
 
