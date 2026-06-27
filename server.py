@@ -125,6 +125,16 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(payload).encode('utf-8'))
             return
 
+        if path == '/api/ratings-bulk':
+            titles = urllib.parse.parse_qs(parsed.query).get('titles', [''])[0]
+            requested_titles = [t.strip() for t in titles.split(',') if t.strip()]
+            payload = {title.strip().lower(): get_ratings(title) for title in requested_titles}
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(payload).encode('utf-8'))
+            return
+
         if path == '/':
             file_path = BASE_DIR / 'index.html'
         else:

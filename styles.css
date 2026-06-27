@@ -95,11 +95,25 @@ h1 { font-size: 1.8rem; line-height: 1.1; }
   gap: 14px;
 }
 .poster-wrap {
+  position: relative;
   aspect-ratio: 2 / 3;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--line);
   background: rgba(255,255,255,0.03);
+}
+.imdb-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(7, 7, 7, 0.9);
+  color: var(--accent-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
 }
 .movie-poster {
   width: 100%;

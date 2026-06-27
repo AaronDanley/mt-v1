@@ -36,6 +36,7 @@ function renderMovies() {
           ${movie.poster
             ? `<img class="movie-poster" src="${movie.poster}" alt="${movie.title} poster" loading="lazy" />`
             : '<div class="poster-placeholder">No poster</div>'}
+          <div class="imdb-badge">IMDb ${movie.imdbRating ?? '—'}</div>
         </div>
         <header>
           <div>
@@ -92,9 +93,12 @@ async function loadMovies() {
   try {
     const postersResponse = await fetch(`/api/posters?titles=${encodeURIComponent(movies.map((movie) => movie.title).join(','))}`);
     const posters = await postersResponse.json();
+    const ratingsResponse = await fetch(`/api/ratings-bulk?titles=${encodeURIComponent(movies.map((movie) => movie.title).join(','))}`);
+    const ratings = await ratingsResponse.json();
     allMovies = movies.map((movie) => ({
       ...movie,
       poster: posters[normalizeTitle(movie.title)] || null,
+      imdbRating: ratings[normalizeTitle(movie.title)]?.imdb ?? null,
     }));
   } catch (error) {
     allMovies = movies;
