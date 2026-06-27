@@ -38,17 +38,19 @@ function renderMovies() {
             : '<div class="poster-placeholder">No poster</div>'}
           <div class="imdb-badge">IMDb ${movie.imdbRating ?? '—'}</div>
         </div>
-        <header>
-          <div>
-            <h3>${movie.title}</h3>
-            <p class="meta">${movie.director} · ${movie.year}</p>
+        <div class="card-content">
+          <header>
+            <div>
+              <h3>${movie.title}</h3>
+              <p class="meta">${movie.director} · ${movie.year}</p>
+            </div>
+            <span class="category-pill">${movie.category}</span>
+          </header>
+          <p class="meta">Watched ${formatDate(movie.watchedDate)} · Released ${formatDate(movie.releaseDate)}</p>
+          <div class="actions">
+            <button class="vote-btn" data-id="${movie.id}" data-vote="up">▲ Keep</button>
+            <button class="ratings-btn" data-id="${movie.id}">View Ratings</button>
           </div>
-          <span class="category-pill">${movie.category}</span>
-        </header>
-        <p class="meta">Watched ${formatDate(movie.watchedDate)} · Released ${formatDate(movie.releaseDate)}</p>
-        <div class="actions">
-          <button class="vote-btn" data-id="${movie.id}" data-vote="up">▲ Keep</button>
-          <button class="ratings-btn" data-id="${movie.id}">View Ratings</button>
         </div>
       </article>
     `)
