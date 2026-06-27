@@ -48,7 +48,6 @@ function renderMovies() {
           </header>
           <p class="meta">Watched ${formatDate(movie.watchedDate)} · Released ${formatDate(movie.releaseDate)}</p>
           <div class="actions">
-            <button class="vote-btn" data-id="${movie.id}" data-vote="up">▲ Keep</button>
             <button class="ratings-btn" data-id="${movie.id}">View Ratings</button>
           </div>
         </div>
@@ -92,19 +91,7 @@ async function loadMovies() {
   const response = await fetch('/movies.json');
   const movies = await response.json();
 
-  try {
-    const postersResponse = await fetch(`/api/posters?titles=${encodeURIComponent(movies.map((movie) => movie.title).join(','))}`);
-    const posters = await postersResponse.json();
-    const ratingsResponse = await fetch(`/api/ratings-bulk?titles=${encodeURIComponent(movies.map((movie) => movie.title).join(','))}`);
-    const ratings = await ratingsResponse.json();
-    allMovies = movies.map((movie) => ({
-      ...movie,
-      poster: posters[normalizeTitle(movie.title)] || null,
-      imdbRating: ratings[normalizeTitle(movie.title)]?.imdb ?? null,
-    }));
-  } catch (error) {
-    allMovies = movies;
-  }
+  allMovies = movies;
 
   const categories = ['all', ...new Set(movies.map((movie) => movie.category))];
   categoryFilter.innerHTML = categories
@@ -116,6 +103,24 @@ async function loadMovies() {
   closeRatings.addEventListener('click', () => ratingsPanel.classList.remove('open'));
 
   renderMovies();
+
+  try {
+    const postersResponse = await fetch(`/api/posters?titles=${encodeURIComponent(movies.map((movie) => movie.title).join(','))}`);
+    const posters = await postersResponse.json();
+    const ratingsResponse = await fetch(`/api/ratings-bulk?titles=${encodeURIComponent(movies.map((movie) => movie.title).join(','))}`);
+    const ratings = await ratingsResponse.json();
+
+    allMovies = movies.map((movie) => ({
+      ...movie,
+      poster: posters[normalizeTitle(movie.title)] || null,
+      imdbRating: ratings[normalizeTitle(movie.title)]?.imdb ?? null,
+    }));
+
+    renderMovies();
+  } catch (error) {
+    allMovies = movies;
+    renderMovies();
+  }
 }
 
 loadMovies();

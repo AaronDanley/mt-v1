@@ -65,16 +65,15 @@ export function extractPosterUrl(html) {
   return null;
 }
 
-export function buildOmdbPosterUrl(title, apiKey = process.env.OMDB_API_KEY || 'trilogy') {
+export function buildTmdbPosterUrl(title, apiKey = process.env.TMDB_API_KEY) {
   const normalizedTitle = String(title || '').trim();
-  if (!normalizedTitle) {
+  if (!normalizedTitle || !apiKey) {
     return null;
   }
 
-  const url = new URL('https://www.omdbapi.com/');
-  url.searchParams.set('apikey', apiKey);
-  url.searchParams.set('t', normalizedTitle);
-  url.searchParams.set('type', 'movie');
+  const url = new URL('https://api.themoviedb.org/3/search/movie');
+  url.searchParams.set('api_key', apiKey);
+  url.searchParams.set('query', normalizedTitle);
   return url.toString();
 }
 
@@ -107,32 +106,18 @@ async function getPoster(title) {
   }
 
   try {
-    const omdbApiKey = process.env.OMDB_API_KEY || 'trilogy';
-    const detailUrl = buildOmdbPosterUrl(title, omdbApiKey);
-    const detailResponse = await fetchUrl(detailUrl);
-    const detailPayload = JSON.parse(detailResponse);
-
-    if (detailPayload.Response === 'True' && detailPayload.Poster && detailPayload.Poster !== 'N/A') {
-      return detailPayload.Poster;
+    const apiKey = process.env.TMDB_API_KEY;
+    if (!apiKey) {
+      return null;
     }
 
-    const searchUrl = new URL('https://www.omdbapi.com/');
-    searchUrl.searchParams.set('apikey', omdbApiKey);
-    searchUrl.searchParams.set('s', title);
-    searchUrl.searchParams.set('type', 'movie');
-
-    const searchResponse = await fetchUrl(searchUrl.toString());
+    const searchUrl = buildTmdbPosterUrl(title, apiKey);
+    const searchResponse = await fetchUrl(searchUrl);
     const searchPayload = JSON.parse(searchResponse);
-    const firstResult = searchPayload.Search?.[0];
+    const firstResult = searchPayload.results?.[0];
 
-    if (firstResult?.Title) {
-      const fallbackUrl = buildOmdbPosterUrl(firstResult.Title, omdbApiKey);
-      const fallbackResponse = await fetchUrl(fallbackUrl);
-      const fallbackPayload = JSON.parse(fallbackResponse);
-
-      if (fallbackPayload.Response === 'True' && fallbackPayload.Poster && fallbackPayload.Poster !== 'N/A') {
-        return fallbackPayload.Poster;
-      }
+    if (firstResult?.poster_path) {
+      return `https://image.tmdb.org/t/p/w154${firstResult.poster_path}`;
     }
 
     return null;

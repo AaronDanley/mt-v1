@@ -59,13 +59,16 @@ def extractPosterUrl(html):
     return None
 
 
-def build_omdb_poster_url(title, api_key=None):
+def build_tmdb_poster_url(title, api_key=None):
     if not title:
         return None
 
-    api_key = api_key or os.environ.get('OMDB_API_KEY', 'trilogy')
-    params = urllib.parse.urlencode({'apikey': api_key, 't': title, 'type': 'movie'})
-    return f'https://www.omdbapi.com/?{params}'
+    api_key = api_key or os.environ.get('TMDB_API_KEY')
+    if not api_key:
+        return None
+
+    params = urllib.parse.urlencode({'api_key': api_key, 'query': title})
+    return f'https://api.themoviedb.org/3/search/movie?{params}'
 
 
 def get_ratings(title):
@@ -115,20 +118,15 @@ def get_poster(title):
         if not query:
             return None
 
-        api_key = os.environ.get('OMDB_API_KEY', 'trilogy')
-        detail_url = build_omdb_poster_url(query, api_key)
-        payload = json.loads(fetch_url(detail_url))
-        if payload.get('Response') == 'True' and payload.get('Poster') and payload.get('Poster') != 'N/A':
-            return payload.get('Poster')
+        api_key = os.environ.get('TMDB_API_KEY')
+        if not api_key:
+            return None
 
-        search_url = f"https://www.omdbapi.com/?{urllib.parse.urlencode({'apikey': api_key, 's': query, 'type': 'movie'})}"
-        search_payload = json.loads(fetch_url(search_url))
-        first_result = search_payload.get('Search', [{}])[0]
-        if first_result.get('Title'):
-            fallback_url = build_omdb_poster_url(first_result['Title'], api_key)
-            fallback_payload = json.loads(fetch_url(fallback_url))
-            if fallback_payload.get('Response') == 'True' and fallback_payload.get('Poster') and fallback_payload.get('Poster') != 'N/A':
-                return fallback_payload.get('Poster')
+        search_url = build_tmdb_poster_url(query, api_key)
+        payload = json.loads(fetch_url(search_url))
+        first_result = payload.get('results', [{}])[0]
+        if first_result.get('poster_path'):
+            return f"https://image.tmdb.org/t/p/w154{first_result['poster_path']}"
 
         return None
     except Exception:

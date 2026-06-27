@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildOmdbPosterUrl, extractPosterUrl } from '../server.js';
+import { buildTmdbPosterUrl, extractPosterUrl } from '../server.js';
 
-test('buildOmdbPosterUrl uses the OMDb API endpoint', () => {
+test('buildTmdbPosterUrl uses the TMDb API endpoint', () => {
   assert.equal(
-    buildOmdbPosterUrl('Mad Max: Fury Road'),
-    'https://www.omdbapi.com/?apikey=trilogy&t=Mad%20Max%3A%20Fury%20Road&type=movie'
+    buildTmdbPosterUrl('Mad Max: Fury Road', 'demo-key'),
+    'https://api.themoviedb.org/3/search/movie?api_key=demo-key&query=Mad+Max%3A+Fury+Road'
   );
 });
 

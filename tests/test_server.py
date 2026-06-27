@@ -1,9 +1,15 @@
 import unittest
 
-from server import extractPosterUrl
+from server import build_tmdb_poster_url, extractPosterUrl
 
 
 class ExtractPosterUrlTests(unittest.TestCase):
+    def test_build_tmdb_poster_url(self):
+        self.assertEqual(
+            build_tmdb_poster_url('Arrival', 'demo-key'),
+            'https://api.themoviedb.org/3/search/movie?api_key=demo-key&query=Arrival'
+        )
+
     def test_extracts_open_graph_poster_url(self):
         html = '<html><head><meta property="og:image" content="https://example.com/poster.jpg" /></head></html>'
         self.assertEqual(extractPosterUrl(html), 'https://example.com/poster.jpg')
