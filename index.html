@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediaTracker — A simpler way to rate what matters</title>
+    <meta
+      name="description"
+      content="A sleek, minimal platform for tracking and rating movies, TV shows, books, and albums with simple up or down reactions."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#">MediaTracker</a>
+        <nav class="topnav" aria-label="Main navigation">
+          <a href="#overview">Overview</a>
+          <a href="#library">Library</a>
+          <a href="#about">About</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero" id="overview">
+          <div class="hero-copy">
+            <p class="eyebrow">Quietly powerful</p>
+            <h1>A calmer way to track what moves you.</h1>
+            <p class="hero-text">
+              Rate movies, TV shows, books, and albums with one simple gesture.
+              No clutter, no noise, just a refined home for your taste.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#library">Explore the concept</a>
+              <a class="btn btn-secondary" href="#about">Why it feels different</a>
+            </div>
+            <ul class="hero-stats" aria-label="Key highlights">
+              <li><strong>4 media types</strong><span>One place for everything</span></li>
+              <li><strong>Simple rating</strong><span>Up or down in a single tap</span></li>
+              <li><strong>Minimal UI</strong><span>Built for focus and calm</span></li>
+            </ul>
+          </div>
+
+          <div class="hero-card" aria-label="Preview of the library experience">
+            <div class="card-label">Live library preview</div>
+            <div class="entry-list">
+              <article class="entry">
+                <div class="entry-meta">
+                  <span class="pill">Film</span>
+                  <span class="entry-title">The Quiet City</span>
+                </div>
+                <div class="rating-row" data-item="1">
+                  <button class="rating-btn up" aria-label="Up vote The Quiet City">▲</button>
+                  <button class="rating-btn down" aria-label="Down vote The Quiet City">▼</button>
+                </div>
+              </article>
+              <article class="entry">
+                <div class="entry-meta">
+                  <span class="pill">TV</span>
+                  <span class="entry-title">Northlight</span>
+                </div>
+                <div class="rating-row" data-item="2">
+                  <button class="rating-btn up" aria-label="Up vote Northlight">▲</button>
+                  <button class="rating-btn down" aria-label="Down vote Northlight">▼</button>
+                </div>
+              </article>
+              <article class="entry">
+                <div class="entry-meta">
+                  <span class="pill">Book</span>
+                  <span class="entry-title">Notes from the Edge</span>
+                </div>
+                <div class="rating-row" data-item="3">
+                  <button class="rating-btn up" aria-label="Up vote Notes from the Edge">▲</button>
+                  <button class="rating-btn down" aria-label="Down vote Notes from the Edge">▼</button>
+                </div>
+              </article>
+              <article class="entry">
+                <div class="entry-meta">
+                  <span class="pill">Album</span>
+                  <span class="entry-title">Static Bloom</span>
+                </div>
+                <div class="rating-row" data-item="4">
+                  <button class="rating-btn up" aria-label="Up vote Static Bloom">▲</button>
+                  <button class="rating-btn down" aria-label="Down vote Static Bloom">▼</button>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="feature-grid" id="library">
+          <article class="feature-card feature-card-large">
+            <div class="section-heading">
+              <p class="eyebrow">A quieter way to browse</p>
+              <h2>Everything in one calm stream.</h2>
+            </div>
+            <p>
+              The experience is built around a single, elegant flow: discover,
+              decide, and move on. Every item gets the same clear response.
+            </p>
+            <div class="stack-preview">
+              <div class="stack-item">
+                <span class="stack-dot"></span>
+                <div>
+                  <strong>Curated shelves</strong>
+                  <p>Movies, TV, books, and albums all feel native to the same space.</p>
+                </div>
+              </div>
+              <div class="stack-item">
+                <span class="stack-dot"></span>
+                <div>
+                  <strong>Gesture-first rating</strong>
+                  <p>A quick up or down keeps the interaction effortless and intentional.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="feature-card">
+            <p class="eyebrow">Designed for taste</p>
+            <h3>Less interface. More feeling.</h3>
+            <p>
+              The visual language leans on crisp typography, restraint, and generous space.
+              It feels premium because it never competes with the content.
+            </p>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="about">
+      <p>MediaTracker concept • Minimal by design • Built for collecting taste, not noise.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
